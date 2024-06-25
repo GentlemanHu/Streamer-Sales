@@ -37,7 +37,7 @@ license: Apache License 2.0
 
 模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **ASR 语音生成文字** 🎙️，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
 
-功能点总结：
+**功能点总结：**
 
 - 📜 主播文案一键生成
 - 🚀 KV cache + Turbomind 推理加速
@@ -83,10 +83,11 @@ license: Apache License 2.0
   - [📺️ 讲解视频](#️-讲解视频)
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
+  - [🎨 快速体验](#-快速体验)
+  - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🌐 Agent](#-agent)
   - [🧱 开发计划](#-开发计划)
-  - [🎨 快速体验](#-快速体验)
   - [🧭 详细指南](#-详细指南)
     - [一、环境搭建](#一环境搭建)
     - [二、微调数据集准备](#二微调数据集准备)
@@ -113,8 +114,8 @@ license: Apache License 2.0
 
 干货满满，欢迎一键三连（疯狂暗示🍺）
 
-|       | 标题  | 视频 |
-| :---: | :-----------------------------------------------------------------------------: | :--------------------------------------------------------------: |
+|       |                                                              标题                                                              |                                                                                                                                                                                                                  视频                                                                                                                                                                                                                   |
+| :---: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 |   🌟   | [爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P) | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P)  [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
 
 ## 🖼 演示
@@ -136,9 +137,63 @@ license: Apache License 2.0
 
 | 模型                            | 基座             | 数据量           | ModelScope(HF)                                                                          | OpenXLab(HF)                                                                                                                                                            |
 | ------------------------------- | ---------------- | ---------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)   |
+| streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)    |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
+
+## 🎨 快速体验
+
+**在线体验地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+
+or 
+
+**本地**：
+
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+cd Streamer-Sales
+conda env create -f environment.yml
+conda activate streamer-sales
+pip install -r requirements.txt
+
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
+```
+
+## 🖥️ 配置需求
+
+1. 微调
+
+需要显存 24G ~ 80G
+
+| batch size | 显存 |
+| ---------- | ---- |
+| 2          | 20G  |
+| 8          | 40G  |
+| 16         | 80G  |
+
+2. 部署
+
+| 模型名称                                                                                      | 显存 |
+| --------------------------------------------------------------------------------------------- | ---- |
+| [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)           | 40G  |
+| [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 24G  |
+
+默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令：
+
+```bash
+export USING_4BIT=true # 设置使用 4bit 模型
+export KV_CACHE=0.05 # 设置 kv cache 在全部模型启动之后，占用的剩余显存比例
+
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
+```
 
 ## 🦸 数字人生成 Workflow
 
@@ -164,8 +219,6 @@ export DELIVERY_TIME_API_KEY="${快递鸟 EBusinessID},${快递鸟 api_key}"
 export WEATHER_API_KEY="${和风天气 API key}"
 ```
 
-
-
 ## 🧱 开发计划
 
 - [x] 生成多个产品数据集
@@ -182,26 +235,6 @@ export WEATHER_API_KEY="${和风天气 API key}"
 - [x] ASR
 - [ ] 多模态
 
-## 🎨 快速体验
-
-**Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
-
-or 
-
-**本地**：
-```bash
-git clone https://github.com/PeterH0323/Streamer-Sales.git
-cd Streamer-Sales
-conda env create -f environment.yml
-conda activate streamer-sales
-pip install -r requirements.txt
-
-# Agent Key (如果没有请忽略)
-export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
-export WEATHER_API_KEY="${天气 API key}"
-
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860
-```
 
 ## 🧭 详细指南
 
@@ -467,8 +500,8 @@ python merge_dataset.py dataset/gen_dataset/trainval_dataset/response dataset/ge
 
 ```diff
 # Model
-- pretrained_model_name_or_path = 'internlm/internlm2-7b'
-+ pretrained_model_name_or_path = '/path/to/internlm/internlm2-7b' # 这步可选，如果事先下载好了模型可以直接使用绝对路径
+- pretrained_model_name_or_path = 'internlm/internlm2-chat-7b'
++ pretrained_model_name_or_path = '/path/to/internlm/internlm2-chat-7b' # 这步可选，如果事先下载好了模型可以直接使用绝对路径
 
 # Data
 - data_path = 'timdettmers/openassistant-guanaco'
@@ -487,8 +520,13 @@ xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_d
 注意：如果显存不够了，优先调小 `batch_size`， 如果 `bs = 1` 还不够则调小 `max_length`，反之还剩很多，调大这两个值
 
 
-如果出现错误： `ValueError: The features can't be aligned because the key conversation of features {'conversation': [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}]} has unexpected type - [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}] (expected either [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='null', id=None), 'system': Value(dtype='string', id=None)}] or Value("null").
-` ，则需要检查 jsonl 文件里面 input output 是否成对出现
+> [!NOTE] 
+> 如果出现错误： 
+> 
+> `ValueError: The features can't be aligned because the key conversation of features {'conversation': [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}]} has unexpected type - [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}] (expected either [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='null', id=None), 'system': Value(dtype='string', id=None)}] or Value("null").
+` 
+>
+> 则需要检查 jsonl 文件里面 input output 是否成对出现
 
 ### 四、说明书生成
 
@@ -608,6 +646,8 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 
 ### 七、如何添加商品
+
+使用网页端可以直接添加，这里介绍下后台是如何实现的。
 
 商品文件都放置在 `./product_info` 目录中，其中
 
