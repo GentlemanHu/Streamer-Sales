@@ -13,6 +13,8 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
+from utils.web_configs import WEB_CONFIGS
+
 # 初始化 Streamlit 页面配置
 st.set_page_config(
     page_title="Streamer-Sales 销冠",
@@ -25,12 +27,11 @@ st.set_page_config(
         "About": "# Streamer-Sales LLM 销冠--卖货主播大模型",
     },
 )
-
-from utils.tools import resize_image
 from utils.rag.rag_worker import gen_rag_db
-from utils.web_configs import WEB_CONFIGS
+from utils.tools import resize_image
 
 from utils.model_loader import RAG_RETRIEVER  # isort:skip
+
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
@@ -166,7 +167,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             )
 
 
-def delete_old_files(directory, limit_time_s=60 * 60 * 1):
+def delete_old_files(directory, limit_time_s=60 * 60 * 5):
     """
     删除指定目录下超过一定时间的文件。
 
