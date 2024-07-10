@@ -1,4 +1,5 @@
 import cv2
+import streamlit as st
 
 
 def resize_image(image_path, max_height):
@@ -24,3 +25,36 @@ def resize_image(image_path, max_height):
     resized_image = cv2.resize(image, (new_width, max_height))
 
     return resized_image
+
+
+def show_video(video_path, autoplay=True, loop=False, muted=False):
+    # 需要 fp25 才能显示
+    # with open(video_path, "rb") as f_wav:
+    #     video_bytes = f_wav.read()
+
+    print(f"Show video: {video_path}")
+    st.video(video_path, format="video/mp4", autoplay=autoplay, loop=loop, muted=muted)
+
+
+def show_audio(tts_path):
+
+    if tts_path is None:
+        return
+
+    with open(tts_path, "rb") as f_wav:
+        audio_bytes = f_wav.read()
+    st.audio(audio_bytes, format="audio/wav")
+
+
+def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=""):
+    total_prompt = [{"role": "system", "content": meta_instruction}]
+
+    if first_input_str != "":
+        total_prompt.append({"role": "user", "content": first_input_str})
+
+    if history_msg is not None:
+        for message in history_msg:
+            total_prompt.append({"role": message["role"], "content": message["content"]})
+
+    total_prompt.append({"role": "user", "content": prompt})
+    return total_prompt

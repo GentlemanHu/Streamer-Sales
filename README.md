@@ -59,6 +59,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
+- [2024.07.10] **前后端分离**，可以自由编排模块服务数量做到负载均衡啦！
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
 - [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
 - [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/README.md) 文档
@@ -83,6 +84,7 @@ license: Apache License 2.0
   - [📺️ 讲解视频](#️-讲解视频)
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
+  - [🏆 获奖信息](#-获奖信息)
   - [🎨 快速体验](#-快速体验)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
@@ -140,6 +142,9 @@ license: Apache License 2.0
 | streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)    |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
+## 🏆 获奖信息
+
+- [2024浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
 
 ## 🎨 快速体验
 
@@ -155,6 +160,71 @@ cd Streamer-Sales
 conda env create -f environment.yml
 conda activate streamer-sales
 pip install -r requirements.txt
+
+```
+
+- 前后端分离版本 ( > v0.7.1 )：
+
+**注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
+
+1. TTS 服务
+
+```bash
+conda activate streamer-sales
+uvicorn server.tts_server.tts_server:app --host 0.0.0.0 --port 8001 # tts
+```
+
+2. 数字人 服务
+
+```bash
+conda activate streamer-sales
+uvicorn server.digital_human_server.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+```
+
+3. ASR 服务
+
+```bash
+conda activate streamer-sales
+uvicorn server.asr_server.asr_server:app --host 0.0.0.0 --port 8003 # asr
+```
+
+4. LLM 服务
+
+```bash
+conda activate streamer-sales
+export LMDEPLOY_USE_MODELSCOPE=True
+lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
+                          --server-port 23333 \
+                          --model-name internlm2 \
+                          --session-len 32768 \
+                          --cache-max-entry-count 0.1 \
+                          --model-format hf
+```
+
+5. 中台服务
+
+```bash
+conda activate streamer-sales
+
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
+uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag + agent
+```
+
+6. 前端
+
+```bash
+conda activate streamer-sales
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
+```
+
+- 前后端融合版本 ( <= v0.7.1 )：
+
+```bash
+
+git checkout v0.7.1
 
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
@@ -184,7 +254,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 | [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)           | 40G  |
 | [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 24G  |
 
-默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令：
+默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ( <= v0.7.1 )：
 
 ```bash
 export USING_4BIT=true # 设置使用 4bit 模型
@@ -196,6 +266,8 @@ export WEATHER_API_KEY="${天气 API key}"
 
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
+
+使用 > 0.7.1 版本只要不启动 ASR 服务就问题不大了。
 
 ## 🦸 数字人生成 Workflow
 
@@ -235,6 +307,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 - [x] 数字人
 - [x] 接入 Agent，支持订单情况、收货时间等实时信息
 - [x] ASR
+- [x] 前后端分离解耦
 - [ ] 多模态
 
 
@@ -630,12 +703,69 @@ python ./benchmark/get_benchmark_report.py
 
 6. 启动 Web APP
 
-> [!NOTE] 
-> 使用 LMDeploy 作为推理框架，将 app.py 里面的 `USING_LMDEPLOY` 设置为 `True`
-> 
-> 反之，使用原生 HF 进行推理，则将 app.py 里面的 `USING_LMDEPLOY` 设置为 `False`
+- 前后端分离版本 ( > v0.7.1 )：
+
+**注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
+
+1. TTS 服务
 
 ```bash
+conda activate streamer-sales
+uvicorn server.tts_server.tts_server:app --host 0.0.0.0 --port 8001 # tts
+```
+
+2. 数字人 服务
+
+```bash
+conda activate streamer-sales
+uvicorn server.digital_human_server.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+```
+
+3. ASR 服务
+
+```bash
+conda activate streamer-sales
+uvicorn server.asr_server.asr_server:app --host 0.0.0.0 --port 8003 # asr
+
+```
+
+4. LLM 服务
+
+```bash
+conda activate streamer-sales
+export LMDEPLOY_USE_MODELSCOPE=True
+lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
+                          --server-port 23333 \
+                          --model-name internlm2 \
+                          --session-len 32768 \
+                          --cache-max-entry-count 0.1 \
+                          --model-format hf
+```
+
+5. 中台服务
+
+```bash
+conda activate streamer-sales
+
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
+uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag + agent
+```
+
+6. 前端
+
+```bash
+conda activate streamer-sales
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
+```
+
+- 前后端融合版本 ( <= v0.7.1 )：
+
+```bash
+
+git checkout v0.7.1
 
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
