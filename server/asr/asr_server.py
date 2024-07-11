@@ -5,12 +5,6 @@ from pydantic import BaseModel
 from ..web_configs import WEB_CONFIGS
 from .asr_worker import load_asr_model, process_asr
 
-# router = APIRouter(
-#     prefix="/asr",
-#     tags=["asr"],
-#     responses={404: {"description": "Not found"}},
-# )
-
 app = FastAPI()
 
 if WEB_CONFIGS.ENABLE_ASR:
@@ -25,7 +19,7 @@ class ASRItem(BaseModel):
     wav_path: str  # wav 文件路径
 
 
-@app.get("/asr")
+@app.post("/asr")
 async def get_asr(asr_item: ASRItem):
     # 语音转文字
     result = ""
@@ -39,3 +33,8 @@ async def get_asr(asr_item: ASRItem):
     logger.info(f"ASR res for id {asr_item.request_id}, res = {result}")
 
     return {"user_id": asr_item.user_id, "request_id": asr_item.request_id, "status": status, "result": result}
+
+
+@app.get("/asr/check")
+async def check_server():
+    return {"message": "server enabled"}

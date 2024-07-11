@@ -171,21 +171,21 @@ pip install -r requirements.txt
 
 ```bash
 conda activate streamer-sales
-uvicorn server.tts_server.tts_server:app --host 0.0.0.0 --port 8001 # tts
+uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001 # tts
 ```
 
 2. 数字人 服务
 
 ```bash
 conda activate streamer-sales
-uvicorn server.digital_human_server.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
 ```
 
 3. ASR 服务
 
 ```bash
 conda activate streamer-sales
-uvicorn server.asr_server.asr_server:app --host 0.0.0.0 --port 8003 # asr
+uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
 ```
 
 4. LLM 服务
@@ -200,6 +200,11 @@ lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --cache-max-entry-count 0.1 \
                           --model-format hf
 ```
+
+如果需要换成 4bit 模型，修改两处地方就行：
+
+- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
+- `--model-format hf` -> `--model-format awq`
 
 5. 中台服务
 
