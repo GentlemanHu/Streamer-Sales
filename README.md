@@ -85,6 +85,7 @@ license: Apache License 2.0
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
   - [🏆 获奖信息](#-获奖信息)
+  - [📰 媒体转载](#-媒体转载)
   - [🎨 快速体验](#-快速体验)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
@@ -146,6 +147,12 @@ license: Apache License 2.0
 
 - [2024浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
 
+## 📰 媒体转载
+
+<p align="center">
+  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
+</p>
+
 ## 🎨 快速体验
 
 **在线体验地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
@@ -192,6 +199,7 @@ uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
 
 ```bash
 conda activate streamer-sales
+export MODELSCOPE_CACHE="./weights/llm_weights"
 export LMDEPLOY_USE_MODELSCOPE=True
 lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --server-port 23333 \
@@ -844,7 +852,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ## 🥳 加群讨论
 
-大家想入群可以在我的主页找到我的微信号，**加好友请备注** `Streamer-Sales` 或者 `销冠大模型`，不备注我不加，加好友后我会拉您进群，欢迎各位的加入。
+大家想入群可以加我的微信，**加好友请备注 `Streamer-Sales` 或者 `销冠大模型`，不备注正确我不加**，我的微信号是 `HinGwenWoong`，加好友后我会拉您进群，欢迎各位的加入。
 
 ## 💕 致谢
 
