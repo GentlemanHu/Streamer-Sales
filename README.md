@@ -280,14 +280,14 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 2. 部署
 
-| 服务名称 | 显存 |
-| :-: | :-: |
-| TTS | 2G （1668MB） |
-| 数字人 | 5G （4734MB） |
-| ASR | 5.5G （5562MB） |
-| RAG | 2G （1974MB） |
-| LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | 16G （16060MB）</br>  建议使用 40G 显卡|
-| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡|
+|                                              服务名称                                               |                  显存                   |
+| :-------------------------------------------------------------------------------------------------: | :-------------------------------------: |
+|                                                 TTS                                                 |              2G （1668MB）              |
+|                                               数字人                                                |              5G （4734MB）              |
+|                                                 ASR                                                 |             5.5G （5562MB）             |
+|                                                 RAG                                                 |              2G （1974MB）              |
+|      LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | 16G （16060MB）</br>  建议使用 40G 显卡 |
+| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡  |
 
 默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ：
 
@@ -852,33 +852,33 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ...
 ```
 
-**Enjoy ！**
-
 ### 如何自定义数字人
 
-本项目支持如何自定义数字人，您可以根据教程自行修改 SD 正反向提示词生成新的数字人，然后修改配置即可。
+本项目支持自定义数字人，支持两种情况：
 
-- 从零开始生成数字人：[ComfyUI 数字人生成](./doc/digital_human/README.md) 
+- 从零开始生成数字人：您可以根据教程 [ComfyUI 数字人生成](./doc/digital_human/README.md) 自行修改 SD 正反向提示词从零开始生成新的数字人，然后修改配置即可。
 - 已有数字人视频，直接修改配置使用： [配置数字人视频路径](./doc/digital_human/README.md#配置数字人视频路径)
 
 ### 如何替换自己的 TTS 
 
-本项目使用的事 GPT-SoVITs 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现
+本项目使用 [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现：
 
-1. 将微调好的 `.ckpt` 和 `.pth` 放到 `./weights/gpt_sovits_weights/star` 文件夹中，**注意，每个模型类型有且只有一个，如果多余一个则取第一个**，最终路径：
+1. 将微调好的 `xxx.ckpt` 和 `xxx.pth` 放到 `./weights/gpt_sovits_weights/star` 文件夹中，**注意，每个模型类型有且只有一个，如果多余一个则取第一个**
 
 2. 将参考音频放到 `./weights/gpt_sovits_weights/star/参考音频` 文件夹中，
 
-文件名规范：`${心情描述}-${参考音频的文字，需要标点符号}.wav`, **一定要有 `-` 和 `.wav` 结尾！**
+文件名规范：`${心情描述}-${参考音频的文字，需要标点符号}.wav`, **心情描述后一定要有 `-` 隔开，同时要以 `.wav` 座位后缀名！**
 
-eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
+例子：`激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
 
-3. 检查文件：完成上面两步，路径应该是这样的：
+3. 检查
+ 
+完成上面两步，路径应该是这样的：
 
 ```bash
 ./weights/gpt_sovits_weights/star
 |-- 参考音频
-|   `-- ${心情描述}-${参考音频的文字，需要标点符号}.wav  # 一定要有 - 和 .wav 结尾
+|   `-- ${心情描述}-${参考音频的文字，需要标点符号}.wav  # 心情描述后一定要有 `-` 隔开，同时要以 `.wav` 座位后缀名！
 |-- 您微调的.ckpt  # 有且只有一个 .ckpt !
 |-- 您微调的.pth  # 有且只有一个 .pth !
 ```
@@ -887,17 +887,17 @@ eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要�
 
 ```diff
 -TTS_INF_NAME: str = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
-+TTS_INF_NAME: str = "${心情描述}-${参考音频的文字，需要标点符号}.wav"
++TTS_INF_NAME: str = "参考音频文件名，例子如上"
 ```
 
-5. 启动 TTS 服务，可以在终端看到程序使用的模型和参考音频、参考文本：
+5. 启动 TTS 服务，启动过程可以在终端看到程序使用的模型、参考音频和参考文本 以便确认：
 
 ```bash
 ============ TTS 模型信息 ============
 gpt_path dir = weights/gpt_sovits_weights/star/艾丝妲-e10.ckpt
 sovits_path dir = weights/gpt_sovits_weights/star/艾丝妲_e25_s925.pth
 ref_wav_path = weights/gpt_sovits_weights/star/参考音频/激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav
-prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和
+prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。
 ====================================
 ```
 
