@@ -1,17 +1,87 @@
-import shutil
-from pathlib import Path
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@File    :   base_server.py
+@Time    :   2024/09/02
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   中台服务入口文件
+"""
 
-import uvicorn
-import yaml
-from fastapi import FastAPI, HTTPException, Response
+from pathlib import Path
+import time
+import uuid
+
+from fastapi import Depends, FastAPI, File, HTTPException, Response, UploadFile
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
+from fastapi.staticfiles import StaticFiles
+from loguru import logger
 from sse_starlette import EventSourceResponse
 
-from ..web_configs import WEB_CONFIGS
-from .modules.rag.rag_worker import rebuild_rag_db
+from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .routers import digital_human, llm, products, streamer_info, streaming_room, users
 from .server_info import SERVER_PLUGINS_INFO
-from .utils import ChatItem, UploadProductItem, SalesInfo, streamer_sales_process
+from .utils import ChatItem, ResultCode, make_return_data, streamer_sales_process
 
-app = FastAPI()
+swagger_description = """
+
+## 项目地址
+
+[销冠 —— 卖货主播大模型 && 后台管理系统](https://github.com/PeterH0323/Streamer-Sales)
+
+## 功能点
+
+1. 📜 **主播文案一键生成**
+2. 🚀 KV cache + Turbomind **推理加速**
+3. 📚 RAG **检索增强生成**
+4. 🔊 TTS **文字转语音**
+5. 🦸 **数字人生成**
+6. 🌐 **Agent 网络查询**
+7. 🎙️ **ASR 语音转文字**
+8. 🍍 **Vue + pinia + element-plus **搭建的前端，可自由扩展快速开发
+9. 🗝️ 后端采用 FastAPI + Uvicorn，**高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
+
+"""
+
+app = FastAPI(
+    title="销冠 —— 卖货主播大模型 && 后台管理系统",
+    description=swagger_description,
+    summary="一个能够根据给定的商品特点从激发用户购买意愿角度出发进行商品解说的卖货主播大模型。",
+    version="1.0.0",
+    # terms_of_service="https://github.com/PeterH0323/Streamer-Sales",
+    # contact={
+    #     "name": "HinGwen.Wong",
+    #     "url": "https://github.com/PeterH0323/",
+    #     "email": "peterhuang0323@qq.com",
+    # },
+    license_info={
+        "name": "AGPL-3.0 license",
+        "url": "https://github.com/PeterH0323/Streamer-Sales/blob/main/LICENSE",
+    },
+)
+
+# 注册路由
+app.include_router(users.router)
+app.include_router(products.router)
+app.include_router(llm.router)
+app.include_router(streamer_info.router)
+app.include_router(streaming_room.router)
+app.include_router(digital_human.router)
+
+
+# 挂载静态文件目录，以便访问上传的文件
+WEB_CONFIGS.SERVER_FILE_ROOT = str(Path(WEB_CONFIGS.SERVER_FILE_ROOT).absolute())
+Path(WEB_CONFIGS.SERVER_FILE_ROOT).mkdir(parents=True, exist_ok=True)
+logger.info(f"上传文件挂载路径: {WEB_CONFIGS.SERVER_FILE_ROOT}")
+logger.info(f"上传文件访问 URL: {API_CONFIG.REQUEST_FILES_URL}")
+app.mount(
+    f"/{API_CONFIG.REQUEST_FILES_URL.split('/')[-1]}",
+    StaticFiles(directory=WEB_CONFIGS.SERVER_FILE_ROOT),
+    name=API_CONFIG.REQUEST_FILES_URL.split("/")[-1],
+)
 
 
 @app.get("/")
@@ -19,120 +89,97 @@ async def hello():
     return {"message": "Hello Streamer-Sales"}
 
 
-@app.get("/streamer-sales/plugins_info")
-async def get_plugins_info():
-    return {
-        "rag": True,
-        "asr": SERVER_PLUGINS_INFO.asr_server_enabled,
-        "tts": SERVER_PLUGINS_INFO.tts_server_enabled,
-        "digital_human": SERVER_PLUGINS_INFO.digital_human_server_enabled,
-        "agent": SERVER_PLUGINS_INFO.agent_enabled,
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    """调 API 入参错误的回调接口
+
+    Args:
+        request (_type_): _description_
+        exc (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    logger.info(request)
+    logger.info(exc)
+    return PlainTextResponse(str(exc), status_code=400)
+
+
+@app.post("/dashboard", tags=["base"], summary="获取主页信息接口")
+async def get_dashboard_info():
+    """首页展示数据"""
+    fake_dashboard_data = {
+        "registeredBrandNum": 98431,  # 入驻品牌方
+        "productNum": 49132,  # 商品数
+        "dailyActivity": 68431,  # 日活
+        "todayOrder": 8461321,  # 订单量
+        "totalSales": 245578131857,  # 销售额
+        "conversionRate": 90.0,  # 转化率
+        # 折线图
+        "orderNumList": [46813, 68461, 99561, 138131, 233812, 84613, 846122],  # 订单量
+        "totalSalesList": [46813, 68461, 99561, 138131, 23383, 84613, 841213],  # 销售额
+        "newUserList": [3215, 65131, 6513, 6815, 2338, 84614, 84213],  # 新增用户
+        "activityUserList": [132, 684, 59431, 4618, 31354, 68431, 88431],  # 活跃用户
+        # 柱状图
+        "knowledgeBasesNum": 12,  # 知识库数量
+        "digitalHumanNum": 3,  # 数字人数量
+        "LiveRoomNum": 5,  # 直播间数量
     }
 
+    return make_return_data(True, ResultCode.SUCCESS, "成功", fake_dashboard_data)
 
-@app.post("/streamer-sales/chat")
+
+@app.get("/plugins_info", tags=["base"], summary="获取组件信息接口")
+async def get_plugins_info():
+
+    plugins_info = SERVER_PLUGINS_INFO.get_status()
+    return make_return_data(True, ResultCode.SUCCESS, "成功", plugins_info)
+
+
+@app.post("/upload/file", tags=["base"], summary="上传文件接口")
+async def upload_product_api(file: UploadFile = File(...), user_id: int = Depends(users.get_current_user_info)):
+
+    file_type = file.filename.split(".")[-1]  # eg. png
+    logger.info(f"upload file type = {file_type}")
+
+    sub_dir_name_map = {
+        "md": WEB_CONFIGS.INSTRUCTIONS_DIR,
+        "png": WEB_CONFIGS.IMAGES_DIR,
+        "jpg": WEB_CONFIGS.IMAGES_DIR,
+        "mp4": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
+        "wav": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
+        "webm": WEB_CONFIGS.ASR_FILE_DIR,
+    }
+    if file_type in ["wav", "mp4"]:
+        save_root = WEB_CONFIGS.STREAMER_FILE_DIR
+    elif file_type in ["webm"]:
+        save_root = ""
+    else:
+        save_root = WEB_CONFIGS.PRODUCT_FILE_DIR
+
+    upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
+
+    sub_dir_name = sub_dir_name_map[file_type]
+    save_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(save_root, sub_dir_name, upload_time + "." + file_type)
+    save_path.parent.mkdir(exist_ok=True, parents=True)
+    logger.info(f"save path = {save_path}")
+
+    # 使用流式处理接收文件
+    with open(save_path, "wb") as buffer:
+        while chunk := await file.read(1024 * 1024 * 5):  # 每次读取 5MB 的数据块
+            buffer.write(chunk)
+
+    split_dir_name = Path(WEB_CONFIGS.SERVER_FILE_ROOT).name  # 保存文件夹根目录名字
+    file_url = f"{API_CONFIG.REQUEST_FILES_URL}{str(save_path).split(split_dir_name)[-1]}"
+
+    # TODO 文件归属记录表
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", file_url)
+
+
+@app.post("/streamer-sales/chat", tags=["base"], summary="对话接口", deprecated=True)
 async def streamer_sales_chat(chat_item: ChatItem, response: Response):
     # 对话总接口
     response.headers["Content-Type"] = "text/event-stream"
     response.headers["Cache-Control"] = "no-cache"
     return EventSourceResponse(streamer_sales_process(chat_item))
-
-
-@app.get("/streamer-sales/get_product_info")
-def get_product_info_api():
-    # 读取 yaml 文件
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    # 根据 ID 排序，避免乱序
-    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
-
-    return {"status": "success", "product_info": product_info_dict}
-
-
-@app.get("/streamer-sales/get_sales_info")
-def get_sales_info_api(sales_info: SalesInfo):
-    """
-    从配置文件中加载销售相关信息
-
-    - sales_info: 系统问候语，针对销售角色定制
-    - first_input_template: 对话开始时的第一个输入模板
-    - product_info_struct_template: 产品信息结构模板
-    """
-
-    # 加载对话配置文件
-    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
-        dataset_yaml = yaml.safe_load(f)
-
-    # 从配置中提取角色信息
-    sales_info = dataset_yaml["role_type"][sales_info.sales_name]  # [WEB_CONFIGS.SALES_NAME]
-
-    # 从配置中提取对话设置相关的信息
-    system = dataset_yaml["conversation_setting"]["system"]
-    first_input = dataset_yaml["conversation_setting"]["first_input"]
-    product_info_struct = dataset_yaml["product_info_struct"]
-
-    # 将销售角色名和角色信息插入到 system prompt
-    system_str = system.replace("{role_type}", WEB_CONFIGS.SALES_NAME).replace("{character}", "、".join(sales_info))
-
-    return {
-        "status": "success",
-        "sales_info": system_str,
-        "first_input_template": first_input,
-        "product_info_struct_template": product_info_struct,
-    }
-
-
-@app.post("/streamer-sales/upload_product")
-async def upload_product_api(upload_product_item: UploadProductItem):
-    # 上传商品
-
-    # TODO 可以不输入商品名称和特性，大模型根据说明书自动生成一版让用户自行修改
-
-    # 显示上传状态，并执行上传操作
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    # 排序防止乱序
-    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
-    max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["id"])
-
-    product_info_dict.update(
-        {
-            upload_product_item.name: {
-                "heighlights": upload_product_item.heightlight.split("、"),
-                "images": str(upload_product_item.image_path),
-                "instruction": str(upload_product_item.instruction_path),
-                "id": product_info_dict[max_id_key]["id"] + 1,
-                "departure_place": upload_product_item.departure_place,
-                "delivery_company_name": upload_product_item.delivery_company,
-            }
-        }
-    )
-
-    # 备份
-    if Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).exists():
-        Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).unlink()
-    shutil.copy(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH)
-
-    # 覆盖保存
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(product_info_dict, f, allow_unicode=True)
-
-    if WEB_CONFIGS.ENABLE_RAG:
-        # 重新生成 RAG 向量数据库
-        rebuild_rag_db()
-
-    return {
-        "user_id": upload_product_item.user_id,
-        "request_id": upload_product_item.request_id,
-        "message": "success uploaded product",
-        "status": "success",
-    }
-
-
-# 执行
-# uvicorn server.main:app --reload
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

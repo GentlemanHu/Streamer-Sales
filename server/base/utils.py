@@ -1,17 +1,34 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@File    :   utils.py
+@Time    :   2024/09/02
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   工具集合文件
+"""
+
+
 import asyncio
 import json
 import wave
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
+import cv2
 from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from ..web_configs import API_CONFIG, WEB_CONFIGS
-
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
+from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .database.product_db import get_db_product_info, save_product_info
+from .database.streamer_info_db import get_streamers_info, save_streamer_info
+from .database.streamer_room_db import get_streaming_room_info, update_streaming_room_info
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -23,10 +40,6 @@ class ChatGenConfig(BaseModel):
     top_p: float = 0.8
     temperature: float = 0.7
     repetition_penalty: float = 1.005
-
-class SalesInfo(BaseModel):
-    # 主播信息
-    sales_name: str
 
 
 class ProductInfo(BaseModel):
@@ -53,17 +66,6 @@ class ChatItem(BaseModel):
     product_info: ProductInfo  # 商品信息
     plugins: PluginsInfo = PluginsInfo()  # 插件信息
     chat_config: ChatGenConfig = ChatGenConfig()
-
-
-class UploadProductItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
-    request_id: str  # 请求 ID，用于生成 TTS & 数字人
-    name: str
-    heightlight: str
-    image_path: str
-    instruction_path: str
-    departure_place: str
-    delivery_company: str
 
 
 # 加载 LLM 模型
@@ -250,3 +252,103 @@ async def streamer_sales_process(chat_item: ChatItem):
         },
         ensure_ascii=False,
     )
+
+
+def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
+    """根据视频第一帧生成缩略图
+
+    Args:
+        video_path (str): 视频文件路径
+
+    Returns:
+        str: 第一帧保存的图片路径
+    """
+
+    # 打开视频文件
+    cap = cv2.VideoCapture(video_path)
+
+    # 读取第一帧
+    ret, frame = cap.read()
+
+    # 检查是否成功读取
+    poster_save_path = str(Path(video_path).parent.joinpath(image_output_name))
+    if ret:
+        # 保存图像到文件
+        cv2.imwrite(poster_save_path, frame)
+        logger.info(f"第一帧已保存为 {poster_save_path}")
+    else:
+        logger.error("无法读取视频帧")
+
+    # 释放视频捕获对象
+    cap.release()
+
+    return poster_save_path
+
+
+async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
+    """根据类型删除某个ID的信息"""
+
+    logger.info(delete_id)
+
+    assert item_type in ["product", "streamer", "room"]
+
+    get_func_map = {
+        "product": get_db_product_info,
+        "streamer": get_streamers_info,
+        "room": get_streaming_room_info,
+    }
+
+    save_func_map = {"product": save_product_info, "streamer": save_streamer_info, "room": update_streaming_room_info}
+
+    id_name_map = {
+        "product": "product_id",
+        "streamer": "id",
+        "room": "room_id",
+    }
+
+    item_list = await get_func_map[item_type](user_id)
+    logger.info(item_list)
+
+    process_success_flag = False
+
+    save_info = None
+    if item_type == "product":
+        for product_name, product_info in item_list.items():
+            if product_info[id_name_map[item_type]] != delete_id:
+                continue
+
+            item_list[product_name]["delete"] = True
+            item_list[product_name].update({"product_name": product_name})
+            save_info = item_list[product_name]
+            process_success_flag = True
+            break
+    else:
+        for idx, item in enumerate(item_list):
+            if item[id_name_map[item_type]] != delete_id:
+                continue
+
+            item_list[idx]["delete"] = True
+            save_info = item_list[idx]
+            process_success_flag = True
+            break
+
+    # 保存
+    save_func_map[item_type](save_info)
+
+    return process_success_flag
+
+
+@dataclass
+class ResultCode:
+    SUCCESS: int = 0000  # 成功
+    FAIL: int = 1000  # 失败
+
+
+def make_return_data(success_flag: bool, code: ResultCode, message: str, data: dict):
+    return {
+        "success": success_flag,
+        "code": code,
+        "message": message,
+        "data": data,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }

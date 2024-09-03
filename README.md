@@ -1,17 +1,3 @@
-<!-- for modelscope yaml info
----
-language:
-- zh
-tags:
-- streamer-sales
-- internlm2
-frameworks:
-- pytorch
-tasks:
-- text-generation
-license: Apache License 2.0
----
--->
 # Streamer-Sales 销冠 —— 卖货主播大模型
 
 <br />
@@ -19,7 +5,7 @@ license: Apache License 2.0
 
 <p align="center">
   <a href="https://github.com/PeterH0323/Streamer-Sales/">
-    <img src="assets/logo.png" alt="Logo" width="30%">
+    <img src="./frontend/src/assets/logo.png" alt="Logo" width="30%">
   </a>
 
 <h3 align="center">Streamer-Sales</h3>
@@ -35,17 +21,20 @@ license: Apache License 2.0
 
 **Streamer-Sales 销冠 —— 卖货主播大模型** 是一个能够根据给定的商品特点从激发用户购买意愿角度出发进行商品解说的卖货主播大模型。以其独特的智能魅力，将彻底改变您的购物体验。该模型能深度理解商品特点，以生动、精准的语言为商品量身打造解说词，让每一件商品都焕发出诱人的光彩。无论是细节之处，还是整体效果，都能通过其细腻、独到的解说，激发用户的购买欲望。
 
-模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **ASR 语音生成文字** 🎙️，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
+模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **ASR 语音生成文字** 🎙️，支持 **RAG 检索增强生成**📚 做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊 生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
 
 **功能点总结：**
 
-- 📜 主播文案一键生成
-- 🚀 KV cache + Turbomind 推理加速
-- 📚 RAG 检索增强生成
-- 🎙️ ASR 语音转文字输入
-- 🔊 TTS 文字转语音输出
-- 🦸 数字人解说视频生成
-- 🌐 Agent 使用网络查询实时快递等信息
+1. 📜 **主播文案一键生成**
+2. 🚀 KV cache + Turbomind **推理加速**
+3. 📚 RAG **检索增强生成**
+4. 🔊 TTS **文字转语音**
+5. 🦸 **数字人生成**
+6. 🌐 **Agent 网络查询**
+7. 🎙️ **ASR 语音转文字**
+8. 🍍 **Vue + pinia + element-plus** 搭建的前端，可自由扩展快速开发
+9. 🗝️ 后端采用 **FastAPI + Uvicorn，高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
 
@@ -55,22 +44,23 @@ license: Apache License 2.0
 
 **文档最后有微信群，欢迎加入一起探讨更多的可能！** 🎉
 
-**开源不易，如果本项目帮到大家，可以右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**  
+**开源不易，如果本项目帮到大家，可以右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐ 是我们最大的鼓励，谢谢各位！**
 
 ## 🎉 NEWS
 
+- [2024.09.02] 💥💥💥**重磅发布：【 AI 卖货主播后台系统 】** ❗❗❗： **前端使用 Vue 重写，后端使用 FastAPI 进一步扩充接口**，更加贴近生产，功能添加更为自由灵活，详见[架构图](#-架构图)
 - [2024.07.23] **支持 Docker-Compose 一键部署**，再也不用担心环境问题，服务可以自由编排，一键部署更加丝滑！
 - [2024.07.10] **前后端分离**，可以定义服务数量做到负载均衡啦！
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
 - [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
 - [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/README.md) 文档
-- [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
+- [2024.05.28] **项目介绍视频发布**：[B 站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 - [2024.05.25] 发布 **TTS 2.0** 版本，**生成的语音在语气和情感方面有大大增强！**
 - [2024.05.23] 发布 TTS 1.0 版本，并支持开放用户自由选择该项功能，但有机器人的感觉
 - [2024.05.22] **支持上传新商品**，上传后会自动生成数据库
 - [2024.05.21] **接入 RAG 检索增强**，主播每次回答问题都会借鉴说明书，**实现加商品无需微调即可让回答更加贴近商品实际**
 - [2024.05.19] 新增说明书生成脚本，可以根据网页图片快速生成说明书，具体逻辑：Web 图片 -> OCR -> LLM -> 说明书
-- [2024.05.15] 接入 [LMDeploy](https://github.com/InternLM/lmdeploy)，**推理效率提升 3倍+** 🚀🚀🚀
+- [2024.05.15] 接入 [LMDeploy](https://github.com/InternLM/lmdeploy)，**推理效率提升 3 倍+** 🚀🚀🚀
 - [2024.05.10] 发布【乐乐喵】4 bit 模型
 - [2024.04.16] 发布【乐乐喵】模型，完成初版页面
 - [2024.04.06] 生成数据初版完成，训练初版模型
@@ -83,15 +73,15 @@ license: Apache License 2.0
   - [📌 目录](#-目录)
   - [🛠 架构图](#-架构图)
   - [📺️ 讲解视频](#️-讲解视频)
-  - [🖼 演示](#-演示)
-  - [⚙ Model Zoo](#-model-zoo)
-  - [🏆 获奖信息](#-获奖信息)
   - [📰 媒体转载](#-媒体转载)
+  - [🏆 获奖信息](#-获奖信息)
+  - [🖼 项目展示](#-项目展示)
+  - [⚙ Model Zoo](#-model-zoo)
   - [🎨 快速体验](#-快速体验)
     - [在线体验](#在线体验)
     - [本地部署](#本地部署)
-      - [Docker-Compose（推荐）](#docker-compose推荐)
       - [宿主机直接部署](#宿主机直接部署)
+      - [Docker-Compose](#docker-compose)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🌐 Agent](#-agent)
@@ -104,10 +94,9 @@ license: Apache License 2.0
     - [五、RAG 向量数据库](#五rag-向量数据库)
     - [六、模型合并 + 量化](#六模型合并--量化)
     - [七、启动 Web APP](#七启动-web-app)
-      - [Docker-Compose（推荐）](#docker-compose推荐-1)
+      - [Docker-Compose（推荐）](#docker-compose推荐)
       - [宿主机直接部署](#宿主机直接部署-1)
   - [🔧 自定义](#-自定义)
-    - [如何添加商品](#如何添加商品)
     - [如何自定义数字人](#如何自定义数字人)
     - [如何替换自己的 TTS](#如何替换自己的-tts)
   - [📧 后记](#-后记)
@@ -115,10 +104,9 @@ license: Apache License 2.0
   - [🥳 加群讨论](#-加群讨论)
   - [💕 致谢](#-致谢)
   - [🎫 开源许可证](#-开源许可证)
+  - [🧾 免责声明](#-免责声明)
   - [🔗 引用](#-引用)
   - [🌟 Star History](#-star-history)
-  - [🧾 免责声明/许可](#-免责声明许可)
-
 
 ## 🛠 架构图
 
@@ -126,25 +114,51 @@ license: Apache License 2.0
 
 ## 📺️ 讲解视频
 
-干货满满，欢迎一键三连（疯狂暗示🍺）
+干货满满，欢迎一键三连（疯狂暗示 🍺）
 
-|       |                                                              标题                                                              |                                                                                                                                                                                                                  视频                                                                                                                                                                                                                   |
-| :---: | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|   🌟   | [爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P) | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P)  [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
+|     |                                                               标题                                                                |                                                                                                                                                                                                                  视频                                                                                                                                                                                                                  |
+| :-: | :-------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| 🌟  | [爆肝 1 个月，我做了个【AI 卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P) | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P) [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
 
-## 🖼 演示
-
-**在线体验地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+## 📰 媒体转载
 
 <p align="center">
-  <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
+  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
+</p>
+
+## 🏆 获奖信息
+
+- [2024 浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
+
+## 🖼 项目展示
+
+<p align="center">
+  <img src="doc/doc_images/admin-demo_gif.gif" alt="Demo gif" width="65%">
 </p>
 
 <p align="center">
-  <img src="doc/doc_images/demo2.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo3.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo4.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo0.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo2.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo2-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo3.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo3-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-0.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-2.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-3.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-4.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo6.png" alt="Demo" width="45%">
+</p>
+
+---
+
+下面是 v0.8.0 的演示图：
+
+<p align="center">
+  <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
 </p>
 
 ## ⚙ Model Zoo
@@ -154,47 +168,20 @@ license: Apache License 2.0
 | streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)    |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
-## 🏆 获奖信息
-
-- [2024浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
-
-## 📰 媒体转载
-
-<p align="center">
-  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
-</p>
-
 ## 🎨 快速体验
 
 ### 在线体验
 
-目前已将 `v0.7.1` 版本部署到 OpenXLab 平台，地址 ：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+目前已将 `v0.7.1` 版本部署到 OpenXLab 平台，地址 ：<https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales>
 
 因为 Agent API 需要计费的关系和显存大小的关系，上面失能了 Agent 和 ASR，但项目本身是支持的，可以自行购买 API 服务和本地部署来体验。
 
 ### 本地部署
 
-#### Docker-Compose（推荐）
-
-```bash
-git clone https://github.com/PeterH0323/Streamer-Sales.git
-
-cd Streamer-Sales
-docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
-
-docker-compose up
-```
-
-> [!NOTE] 
-> 如果出现错误： 
-> 
-> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
-> 
-> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
-
 #### 宿主机直接部署
 
 - 环境搭建：
+
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 cd Streamer-Sales
@@ -216,62 +203,51 @@ pip install -r requirements.txt
 1. TTS 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001 # tts
+bash deploy.sh tts
 ```
 
 2. 数字人 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+bash deploy.sh dg
 ```
 
 3. ASR 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
+bash deploy.sh asr
 ```
 
 4. LLM 服务
 
 ```bash
-conda activate streamer-sales
-export MODELSCOPE_CACHE="./weights/llm_weights"
-export LMDEPLOY_USE_MODELSCOPE=True
-lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
-                          --server-port 23333 \
-                          --model-name internlm2 \
-                          --session-len 32768 \
-                          --cache-max-entry-count 0.1 \
-                          --model-format hf
+bash deploy.sh llm
 ```
 
-使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
+默认使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，建议使用 40G 显存机器。
 
-如果您的机器是 24G 的显卡，需要换成 4bit 模型，修改命令中的两处地方就行：
+如果您的机器是 24G 的显卡，需要换成 4bit 模型，命令如下：
 
-- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
-- `--model-format hf` -> `--model-format awq`
+```bash
+bash deploy.sh llm-4bit
+```
 
 5. 中台服务
 
 ```bash
-conda activate streamer-sales
-
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
 export WEATHER_API_KEY="${天气 API key}"
 
-uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag + agent
+bash deploy.sh base
 ```
 
 6. 前端
 
+需要先搭建前端的环境，详见 [搭建前端环境文档](./doc/frontend/README.md)
+
 ```bash
-conda activate streamer-sales
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
+bash deploy.sh frontend
 ```
 
 </details>
@@ -280,7 +256,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 <summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
-
 git checkout v0.7.1
 
 # Agent Key (如果没有请忽略)
@@ -291,6 +266,25 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 </details>
+
+#### Docker-Compose
+
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+
+cd Streamer-Sales
+docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
+
+docker-compose up
+```
+
+> [!NOTE]
+> 如果出现错误：
+>
+> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
+>
+> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
+
 
 ## 🖥️ 配置需求
 
@@ -310,7 +304,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 |     docker     |                    24.0.7                     |
 | docker-compose |                    1.29.0                     |
 
-
 2. 微调显存
 
 需要显存 24G ~ 80G
@@ -323,14 +316,14 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 3. 服务部署显存占用一览表
 
-|                                              服务名称                                               |                  显存                   |
-| :-------------------------------------------------------------------------------------------------: | :-------------------------------------: |
-|                                                 TTS                                                 |              2G （1668MB）              |
-|                                               数字人                                                |              5G （4734MB）              |
-|                                                 ASR                                                 |             5.5G （5562MB）             |
-|                                                 RAG                                                 |              2G （1974MB）              |
-|      LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | 16G （16060MB）</br>  建议使用 40G 显卡 |
-| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡  |
+|                                              服务名称                                               |                  显存                  |
+| :-------------------------------------------------------------------------------------------------: | :------------------------------------: |
+|                                                 TTS                                                 |             2G （1668MB）              |
+|                                               数字人                                                |             5G （4734MB）              |
+|                                                 ASR                                                 |            5.5G （5562MB）             |
+|                                                 RAG                                                 |             2G （1974MB）              |
+|      LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | 16G （16060MB）</br> 建议使用 40G 显卡 |
+| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡 |
 
 默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ：
 
@@ -349,8 +342,8 @@ export WEATHER_API_KEY="${天气 API key}"
 
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
-</details>
 
+</details>
 
 ## 🦸 数字人生成 Workflow
 
@@ -379,7 +372,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 ## 🧱 开发计划
 
 - [x] 生成多个产品数据集
-- [x] 根据产品生成话术，每个都是5个往来的对话
+- [x] 根据产品生成话术，每个都是 5 个往来的对话
 - [ ] 支持多种角色
   - [x] 乐乐喵——可爱萝莉，
   - [ ] 更多角色正在规划中，敬请期待！
@@ -393,7 +386,6 @@ export WEATHER_API_KEY="${和风天气 API key}"
 - [x] 前后端分离解耦
 - [ ] 多模态
 
-
 ## 🧭 详细指南
 
 本指南会从以下几点进行说明：
@@ -402,9 +394,9 @@ export WEATHER_API_KEY="${和风天气 API key}"
 2. [微调数据集准备](#二微调数据集准备)
 3. [训练](#三训练)
 4. [说明书生成](#四说明书生成)
-5. [RAG向量数据库](#五RAG向量数据库)
-6. [部署](#六部署)
-7. [如何添加商品](#七如何添加商品)
+5. [RAG 向量数据库](#五rag-向量数据库)
+6. [模型合并 + 量化](#六模型合并--量化)
+7. [启动 Web APP](#七启动-web-app)
 
 ### 一、环境搭建
 
@@ -450,7 +442,7 @@ data_generation_setting:
   # 每个产品生成 ${each_product_gen} 个 conversion 数据，conversion 中包含【文案 + QA】，
   each_product_gen: 3
 
-  # 每个 conversion 中的的对话数，文案为 1 个，其余会生成 ${each_conversation_qa} - 1 个 QA 
+  # 每个 conversion 中的的对话数，文案为 1 个，其余会生成 ${each_conversation_qa} - 1 个 QA
   each_conversation_qa: 5
 
   # 每个文案生成随机抽取 ${each_pick_hightlight} 个亮点
@@ -464,9 +456,9 @@ data_generation_setting:
                       我的{product_info}，你需要根据我给出的商品信息撰写一段至少600字的直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。
                       输出文案后，结合商品信息站在消费者的角度根据[{customer_question}]提出{each_conversation_qa}个问题并解答。
                       全部输出的信息使用我期望的 json 格式进行输出：{dataset_json_format}。注意 json 一定要合法。
- 
+
   # 数据生成 json 格式
-  dataset_json_format: 
+  dataset_json_format:
     '{
       "conversation": [
         {
@@ -528,9 +520,9 @@ product_list:
     ...
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 温馨提示
-> 
+>
 > 别让大模型大量生成严格格式的数据，JSON 首当其冲，prompt 提示词用得不好，很容易会出现 JSON 解析错误，导致 Api Token 白花了，最好是生成特定的文本格式，然后用正则去取用
 
 3. 使用脚本可以进行生成：
@@ -542,7 +534,7 @@ cd dataset/gen_dataset
 python gen_dataset.py ${model_type}
 ```
 
-如果需要指定某一个角色数据的生成在命令后面加上 `--specific_name xxx` 
+如果需要指定某一个角色数据的生成在命令后面加上 `--specific_name xxx`
 
 ```bash
 python gen_dataset.py ${model_type} --specific_name 乐乐喵
@@ -651,7 +643,6 @@ python merge_dataset.py dataset/gen_dataset/trainval_dataset/response dataset/ge
     ...
 ```
 
-
 ### 三、训练
 
 1. 将 `./finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_data.py` 中 数据集路径 和 模型路径 改为您的本地路径
@@ -677,12 +668,11 @@ xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_d
 
 注意：如果显存不够了，优先调小 `batch_size`， 如果 `bs = 1` 还不够则调小 `max_length`，反之还剩很多，调大这两个值
 
-
-> [!NOTE] 
-> 如果出现错误： 
-> 
+> [!NOTE]
+> 如果出现错误：
+>
 > `ValueError: The features can't be aligned because the key conversation of features {'conversation': [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}]} has unexpected type - [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}] (expected either [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='null', id=None), 'system': Value(dtype='string', id=None)}] or Value("null").
-` 
+`
 >
 > 则需要检查 jsonl 文件里面 input output 是否成对出现
 
@@ -691,6 +681,7 @@ xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_d
 1. 搭建环境
 
 这里用到 ppocr 工具来进行 ocr 识别，在这里我另外生成了一个虚拟环境，避免有版本冲突
+
 ```bash
 conda create -n ppocr python=3.8
 conda activate ppocr
@@ -712,11 +703,11 @@ python gen_instructions.py --image_dir /path/to/image_dir --ocr_output_dir ./ocr
 
 调取上面的脚本会生成 OCR 识别结果，以及最终的 markdown 说明书文件。`ocr_output_dir` 里面会生成 `work_dir` 文件夹，里面有识别结果图。
 
-OCR 识别过程中，如果图片长宽比例大于2，则会设置步长为短边滑动窗口对长边进行切图，确保识别结果比较准确
+OCR 识别过程中，如果图片长宽比例大于 2，则会设置步长为短边滑动窗口对长边进行切图，确保识别结果比较准确
 
 ### 五、RAG 向量数据库
 
-> [!NOTE] 
+> [!NOTE]
 > 这步可跳过，因为后面的 Web APP 启动的时候会执行
 
 1. 切换环境
@@ -799,6 +790,7 @@ docker-compose up
 #### 宿主机直接部署
 
 - 环境搭建：
+
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 cd Streamer-Sales
@@ -875,7 +867,7 @@ uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag
 
 ```bash
 conda activate streamer-sales
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 </details>
@@ -898,39 +890,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ## 🔧 自定义
 
-### 如何添加商品
-
-使用网页端可以直接添加，这里介绍下后台是如何实现的。
-
-商品文件都放置在 `./product_info` 目录中，其中
-
-- `images`: 存放商品图片
-- `instructions`: 存放商品说明书
-- `product_info.yaml`: 商品信息表
-
-`product_info.yaml` 解析：
-
-```yaml
-商品名: 
-    heighlights: [亮点1, 亮点2, 亮点3]
-    images: 商品图片路径，必须位于 product_info/images/ 中
-    instruction: 商品说明书路径，必须位于 product_info/instructions/ 中，说明书需要时 markdown 格式
-    departure_place: 发货地点（城市名）
-    delivery_company_name: 快递公司名称
-    id: int 数字，用于排序，越小越靠前
-
-# 例子：
-
-唇膏: 
-    heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
-    images: "./product_info/images/lip_stick.png"
-    instruction: "./product_info/instructions/lip_stick.md"
-    departure_place: "杭州"
-    delivery_company_name: "圆通"
-    id: 1
-...
-```
-
 ### 如何自定义数字人
 
 本项目支持自定义数字人，支持两种情况：
@@ -938,7 +897,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 - 从零开始生成数字人：您可以根据教程 [ComfyUI 数字人生成](./doc/digital_human/README.md) 自行修改 SD 正反向提示词从零开始生成新的数字人，然后修改配置即可。
 - 已有数字人视频，直接修改配置使用： [配置数字人视频路径](./doc/digital_human/README.md#配置数字人视频路径)
 
-### 如何替换自己的 TTS 
+### 如何替换自己的 TTS
 
 本项目使用 [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现：
 
@@ -951,7 +910,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 例子：`激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
 
 3. 检查
- 
+
 完成上面两步，路径应该是这样的：
 
 ```bash
@@ -980,14 +939,13 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 ====================================
 ```
 
-
 ## 📧 后记
 
 本项目属于个人的一个学习项目，目前还在起步阶段，有很多不足的地方，望各位大佬轻喷。
 
 首先说下我为什么做这个项目吧，本人在 CV 界混迹多年，眼看着大模型那叫一个火速崛起，感觉自己再不努努力，就要被拍在沙滩上了。所以，我毅然决然跳出舒适圈，去跟大模型的知识死磕一番。
 
-“纸上得来终觉浅，绝知此事要躬行”。我决定搞点实际的，把学到的大模型知识用起来，看看能玩出什么来。思索项目 idea 那阵子，简直脑壳疼，各种 idea 飞来飞去，最后敲定【AI带货主播】这个方向，觉得既有创意又好玩。这项目对我来说，既是一场学习的修行，也是自我的突破，向着科技前沿狂奔！
+“纸上得来终觉浅，绝知此事要躬行”。我决定搞点实际的，把学到的大模型知识用起来，看看能玩出什么来。思索项目 idea 那阵子，简直脑壳疼，各种 idea 飞来飞去，最后敲定【AI 带货主播】这个方向，觉得既有创意又好玩。这项目对我来说，既是一场学习的修行，也是自我的突破，向着科技前沿狂奔！
 
 开源后，用户慢慢的多了起来，不少公司也在尝试使用，收到的反馈真是让我受宠若惊，感谢各位大佬的点赞和支持，还有大佬分享了行业内的信息，简直太宝贵了！你们的每一条反馈都是我前进的动力，感激不尽！
 
@@ -995,7 +953,7 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 
 后续我会针对各位提出的反馈对项目进行持续完善。同时，欢迎各位扫一扫下方二维码加群一起讨论，任何想法、建议都可以提出，期待各位的反馈，感谢感谢！
 
-**如果本项目帮到大家，可以在 GitHub 上右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**
+**如果本项目帮到大家，可以在 GitHub 上右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐ 是我们最大的鼓励，谢谢各位！**
 
 ## 💳 打赏
 
@@ -1024,7 +982,15 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 
 ## 🎫 开源许可证
 
-该项目采用 [Apache License 2.0 开源许可证](https://github.com/PeterH0323/Streamer-Sales/LICENSE) 同时，请遵守所使用的模型与数据集的许可证。
+1. 该项目代码采用 [AGPL-3.0](https://github.com/PeterH0323/Streamer-Sales/LICENSE) 同时，请遵守所使用的模型与数据集的许可证。
+
+2. 乐乐喵模型使用的是 Apache License 2.0 开源许可
+
+3. `其他开源模型`：使用的其他开源模型必须遵守他们的许可证，如 `InternLM2`、`GPT-SoVITS`、`ft-mse-vae` 等。
+
+## 🧾 免责声明
+
+本项目旨在积极影响基于人工智能的文字、语音、视频生成领域。用户被授予使用此工具创建文字、语音、视频的自由，但他们应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。
 
 ## 🔗 引用
 
@@ -1042,9 +1008,3 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 ## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PeterH0323/Streamer-Sales&type=Date)](https://star-history.com/#PeterH0323/Streamer-Sales&Date)
-
-## 🧾 免责声明/许可
-
-1. `代码`：`Streamer-Sales` 的代码采用 `Apache` 许可证发布，学术用途和商业用途都可以。
-2. `其他开源模型`：使用的其他开源模型必须遵守他们的许可证，如 `InternLM2`、`GPT-SoVITS`、`ft-mse-vae` 等。
-3. `AIGC`：本项目旨在积极影响基于人工智能的文字、语音、视频生成领域。用户被授予使用此工具创建文字、语音、视频的自由，但他们应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。
