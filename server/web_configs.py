@@ -34,10 +34,17 @@ class WebConfigs:
     TOKEN_JWT_ALGORITHM = "HS256"
 
     # ==================================================================
+    #                             数据库配置
+    # ==================================================================
+    POSTGRES_SERVER = "127.0.0.1"  # 数据库 IP
+    POSTGRES_PORT = 5432  # 数据库端口号
+    POSTGRES_USER = "postgres"  # 数据库用户名
+    POSTGRES_PASSWORD = ""  # 数据库密码，自行填写
+    POSTGRES_DB = "streamer_sales_db"  # 数据库名字
+
+    # ==================================================================
     #                             配置文件路径
     # ==================================================================
-    PRODUCT_INFO_YAML_PATH: str = r"./configs/product_info.yaml"  # 商品信息
-    STREAMER_CONFIG_PATH = r"./configs/streamer_cfg.yaml"  # 主播信息
     STREAMING_ROOM_CONFIG_PATH = r"./configs/streaming_room_cfg.yaml"  # 直播间信息
     CONVERSATION_MESSAGE_STORE_CONFIG_PATH = r"./configs/conversation_message_store.yaml"  # 对话信息
 
@@ -97,6 +104,8 @@ class ApiConfig:
     # ==================================================================
     #                               URL 配置
     # ==================================================================
+    API_V1_STR: str = "/api/v1"
+
     USING_DOCKER_COMPOSE: bool = os.environ.get("USING_DOCKER_COMPOSE", "false") == "true"
 
     # 路由名字和 compose.yaml 服务名对应
@@ -114,13 +123,14 @@ class ApiConfig:
     DIGITAL_HUMAN_CHECK_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human/check"
     DIGITAL_HUMAN_PREPROCESS_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human/preprocess"
 
-    CHAT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/chat"
-    UPLOAD_PRODUCT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/upload_product"
-    GET_PRODUCT_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_product_info"
-    GET_SALES_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_sales_info"
-    PLUGINS_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/plugins_info"
+    BASE_SERVER_URL: str = f"http://{BASE_ROUTER_NAME}:8000{API_V1_STR}"
+    CHAT_URL: str = f"{BASE_SERVER_URL}/streamer-sales/chat"
+    UPLOAD_PRODUCT_URL: str = f"{BASE_SERVER_URL}/streamer-sales/upload_product"
+    GET_PRODUCT_INFO_URL: str = f"{BASE_SERVER_URL}/streamer-sales/get_product_info"
+    GET_SALES_INFO_URL: str = f"{BASE_SERVER_URL}/streamer-sales/get_sales_info"
+    PLUGINS_INFO_URL: str = f"{BASE_SERVER_URL}/streamer-sales/plugins_info"
 
-    REQUEST_FILES_URL = f"http://{BASE_ROUTER_NAME}:8000/files"
+    REQUEST_FILES_URL = f"{BASE_SERVER_URL}/files"
 
 
 # 实例化

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { ElInput } from 'element-plus'
 import type { InputInstance } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -27,9 +27,27 @@ const inputCharacterValue = ref('')
 const inputCharacterVisible = ref(false)
 const InputCharacterRef = ref<InputInstance>()
 
+modelSteamerInfo.value.character = ''
+let characterList = ref([] as string[])
+watch(
+  modelSteamerInfo,
+  (newValue) => {
+    console.log(`性格：更新为: ${newValue}`)
+
+    if (
+      typeof modelSteamerInfo.value.character === 'string' &&
+      modelSteamerInfo.value.character !== ''
+    ) {
+      characterList.value = modelSteamerInfo.value.character.split(';')
+    }
+  },
+  { immediate: true }
+)
+
 const handleCharacterClose = (tag: string) => {
   // 删除性格操作
-  modelSteamerInfo.value.character.splice(modelSteamerInfo.value.character.indexOf(tag), 1)
+  characterList.value.splice(characterList.value.indexOf(tag), 1)
+  modelSteamerInfo.value.character = characterList.value.join(';')
 }
 
 const showCharacterInput = () => {
@@ -41,7 +59,8 @@ const showCharacterInput = () => {
 
 const handleCharacterInputConfirm = () => {
   if (inputCharacterValue.value) {
-    modelSteamerInfo.value.character.push(inputCharacterValue.value)
+    characterList.value.push(inputCharacterValue.value)
+    modelSteamerInfo.value.character = characterList.value.join(';')
   }
   inputCharacterVisible.value = false
   inputCharacterValue.value = ''
@@ -66,7 +85,7 @@ const labelPosition = ref('top')
           >
             <el-option
               v-for="item in props.optionList"
-              :key="item.id"
+              :key="item.streamer_id"
               :label="item.name"
               :value="item"
             />
@@ -86,7 +105,7 @@ const labelPosition = ref('top')
             </el-form-item>
             <el-form-item label="主播性格">
               <el-tag
-                v-for="(characterItem, index) in modelSteamerInfo.character"
+                v-for="(characterItem, index) in characterList"
                 :key="index"
                 :closable="!props.disableChange"
                 :disable-transitions="false"

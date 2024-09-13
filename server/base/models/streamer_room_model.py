@@ -9,19 +9,15 @@
 @Desc    :   直播间信息数据结构定义
 """
 
-from typing import List, Optional
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
-from ..models.product_model import ProductItem, ProductPageItem
+from pydantic import BaseModel
+from sqlmodel import Field, Relationship, SQLModel
 
-from ..models.streamer_info_model import StreamerInfoItem
-
-
-class RoomProductListItem(BaseModel):
-    roomId: int
-    currentPage: int = 1
-    pageSize: int = 10
+from ..models.user_model import UserInfo
+from ..models.product_model import ProductInfo
+from ..models.streamer_info_model import StreamerInfo
 
 
 class RoomChatItem(BaseModel):
@@ -30,49 +26,65 @@ class RoomChatItem(BaseModel):
     asrFileUrl: str = ""
 
 
-class MessageItem(BaseModel):
-    role: str
-    userId: int
-    userName: str
-    message: str
-    avatar: str
-    messageIndex: int
-    datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# =======================================================
+#                      直播间数据库模型
+# =======================================================
 
 
-class OnAirRoomStatusItem(BaseModel):
+class SalesDocAndVideoInfo(SQLModel, table=True):
+    """直播间 文案 和 数字人介绍视频数据结构"""
+
+    __tablename__ = "sales_doc_and_video_info"
+
+    sales_info_id: int | None = Field(default=None, primary_key=True, unique=True)
+
+    sales_doc: str = ""  # 讲解文案
+    start_video: str = ""  # 开播时候第一个讲解视频
+    start_time: datetime | None = None  # 当前商品开始时间
+    selected: bool = True
+
+    product_id: int | None = Field(default=None, foreign_key="product_info.product_id")
+    product_info: ProductInfo | None = Relationship(back_populates="sales_info", sa_relationship_kwargs={"lazy": "selectin"})
+
+    room_id: int | None = Field(default=None, foreign_key="stream_room_info.room_id")
+    stream_room: Optional["StreamRoomInfo"] | None = Relationship(back_populates="product_list")
+
+
+class OnAirRoomStatusItem(SQLModel, table=True):
     """直播间状态信息"""
 
-    conversation_id: str = ""  # 现阶段的对话 ID
-    current_product_id: int = 1  # 目前介绍的商品 ID
-    current_product_index: int = 0  # 商品列表索引
-    current_product_start_time: str = ""  # 该商品开始时间
+    __tablename__ = "on_air_room_status_item"
+
+    status_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
+
+    sales_info_id: int | None = Field(default=None, foreign_key="sales_doc_and_video_info.sales_info_id")
+
+    current_product_index: int = 0  # 目前讲解的商品列表索引
     streaming_video_path: str = ""  # 目前介绍使用的视频
 
     live_status: int = 0  # 直播间状态 0 未开播，1 正在直播，2 下播了
-    start_time: str = ""  # 直播开始时间
+    start_time: datetime | None = None  # 直播开始时间
+    end_time: datetime | None = None  # 直播下播时间
 
+    room_info: Optional["StreamRoomInfo"] | None = Relationship(
+        back_populates="status", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
-class StreamRoomProductDatabaseItem(BaseModel):
-    """直播间商品信息，数据库保存时的数据结构"""
-
-    product_id: int = 0
-    sales_doc: str = ""
-    start_time: str = ""
-    start_video: str = ""
-    selected: bool = True
-
-
-class StreamRoomInfoDatabaseItem(BaseModel):
     """直播间信息，数据库保存时的数据结构"""
 
-    user_id: int = 0  # 用户ID
-    room_id: int = 0  # 直播间 ID
-    streamer_id: int = 0  # 主播 ID
+
+class StreamRoomInfo(SQLModel, table=True):
+
+    __tablename__ = "stream_room_info"
+
+    room_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
+
     name: str = ""  # 直播间名字
 
-    product_list: List[StreamRoomProductDatabaseItem] = []  # 商品列表
-    status: OnAirRoomStatusItem | None = None  # 直播状态
+    product_list: list[SalesDocAndVideoInfo] = Relationship(
+        back_populates="stream_room",
+        sa_relationship_kwargs={"lazy": "selectin", "order_by": "asc(SalesDocAndVideoInfo.product_id)"},
+    )  # 商品列表，查找的时候加上 order_by 自动排序，desc -> 降序; asc -> 升序
 
     prohibited_words_id: int = 0  # 违禁词表 ID
     room_poster: str = ""  # 海报图
@@ -80,18 +92,36 @@ class StreamRoomInfoDatabaseItem(BaseModel):
 
     delete: bool = False  # 是否删除
 
+    status_id: int | None = Field(default=None, foreign_key="on_air_room_status_item.status_id")
+    status: OnAirRoomStatusItem | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
 
-class StreamRoomInfoReponseItem(StreamRoomInfoDatabaseItem):
-    """直播间接口返回的数据结构，继承自 StreamRoomInfoDatabaseItem"""
+    streamer_id: int | None = Field(default=None, foreign_key="streamer_info.streamer_id")  # 主播 ID
+    streamer_info: StreamerInfo | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
 
-    streamer_info: StreamerInfoItem = {}
-
-
-class StreamRoomProductItem(StreamRoomProductDatabaseItem, ProductItem):
-    """直播间商品信息，内含商品基本信息 ProductPageItem 和 文案数字人信息 StreamRoomProductDatabaseItem"""
-
-    ...
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
 
 
-class StreamRoomDetailItem(ProductPageItem, StreamRoomInfoReponseItem):
-    product_list: List[StreamRoomProductItem] = []
+# =======================================================
+#                    直播对话数据库模型
+# =======================================================
+
+
+class ChatMessageInfo(SQLModel, table=True):
+    """直播页面对话数据结构"""
+
+    __tablename__ = "chat_message_info"
+
+    message_id: int | None = Field(default=None, primary_key=True, unique=True)  # 消息 ID
+
+    sales_info_id: int | None = Field(default=None, foreign_key="sales_doc_and_video_info.sales_info_id")
+    sales_info: SalesDocAndVideoInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
+    user_info: UserInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    streamer_id: int | None = Field(default=None, foreign_key="streamer_info.streamer_id")
+    streamer_info: StreamerInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    role: str
+    message: str
+    send_time: datetime | None = None

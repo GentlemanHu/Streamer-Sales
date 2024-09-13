@@ -9,44 +9,51 @@
 @Desc    :   商品数据类型定义
 """
 
+from datetime import datetime
 from typing import List
 from pydantic import BaseModel
-from fastapi import File
+from sqlmodel import Field, Relationship, SQLModel
 
 
-class ProductItem(BaseModel):
+# =======================================================
+#                      数据库模型
+# =======================================================
+
+
+class ProductInfo(SQLModel, table=True):
     """商品信息"""
 
-    user_id: int = 0
-    product_id: int = 0
-    product_name: str = ""
+    __tablename__ = "product_info"
+
+    product_id: int | None = Field(default=None, primary_key=True, unique=True)
+    product_name: str = Field(index=True, unique=True)
     product_class: str
-    heighlights: List[str]
+    heighlights: str
     image_path: str
     instruction: str
     departure_place: str
     delivery_company: str
     selling_price: float
     amount: int
-    upload_date: str = ""
+    upload_date: datetime = datetime.now()
     delete: bool = False
 
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
 
-class PageItem(BaseModel):
+    sales_info: list["SalesDocAndVideoInfo"] = Relationship(back_populates="product_info")
+
+
+# =======================================================
+#                      基本模型
+# =======================================================
+
+
+class ProductPageItem(BaseModel):
+    product_list: List[ProductInfo] = []
     currentPage: int = 0  # 当前页数
     pageSize: int = 0  # 页面的组件数量
     totalSize: int = 0  # 总大小
 
 
-class ProductPageItem(PageItem):
-    product_list: List[ProductItem] = []
-
-
-class ProductQueryItem(PageItem):
-    productName: str = ""  # 商品名，用于指定查询
-    productId: str = "-1"  # 商品ID，用于指定查询
+class ProductQueryItem(BaseModel):
     instructionPath: str = ""  # 商品说明书路径，用于获取说明书内容
-
-
-class DeleteProductItem(BaseModel):
-    product_id: int

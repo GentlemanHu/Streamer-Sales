@@ -9,21 +9,22 @@
 @Desc    :   中台服务入口文件
 """
 
-from pathlib import Path
 import time
 import uuid
+from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
-from sse_starlette import EventSourceResponse
 
 from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .database.init_db import create_db_and_tables
 from .routers import digital_human, llm, products, streamer_info, streaming_room, users
 from .server_info import SERVER_PLUGINS_INFO
-from .utils import ChatItem, ResultCode, make_return_data, streamer_sales_process
+from .utils import ChatItem, ResultCode, gen_default_data, make_return_data, streamer_sales_process
 
 swagger_description = """
 
@@ -41,26 +42,38 @@ swagger_description = """
 6. 🌐 **Agent 网络查询**
 7. 🎙️ **ASR 语音转文字**
 8. 🍍 **Vue + pinia + element-plus **搭建的前端，可自由扩展快速开发
-9. 🗝️ 后端采用 FastAPI + Uvicorn，**高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+9. 🗝️ 后端采用 FastAPI + Uvicorn + PostgreSQL，**高性能，高效编码，生产可用，同时具有 JWT 身份验证**
 10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 """
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """服务生命周期函数"""
+    # 启动
+    create_db_and_tables()  # 创建数据库和数据表
+
+    # 新服务，生成默认数据，可以自行注释 or 修改
+    gen_default_data()
+
+    yield
+
+    # 结束
+    logger.info("Base server stopped.")
+
 
 app = FastAPI(
     title="销冠 —— 卖货主播大模型 && 后台管理系统",
     description=swagger_description,
     summary="一个能够根据给定的商品特点从激发用户购买意愿角度出发进行商品解说的卖货主播大模型。",
     version="1.0.0",
-    # terms_of_service="https://github.com/PeterH0323/Streamer-Sales",
-    # contact={
-    #     "name": "HinGwen.Wong",
-    #     "url": "https://github.com/PeterH0323/",
-    #     "email": "peterhuang0323@qq.com",
-    # },
     license_info={
         "name": "AGPL-3.0 license",
         "url": "https://github.com/PeterH0323/Streamer-Sales/blob/main/LICENSE",
     },
+    root_path=API_CONFIG.API_V1_STR,
+    lifespan=lifespan,
 )
 
 # 注册路由
@@ -100,12 +113,12 @@ async def validation_exception_handler(request, exc):
     Returns:
         _type_: _description_
     """
-    logger.info(request)
+    logger.info(request.headers)
     logger.info(exc)
     return PlainTextResponse(str(exc), status_code=400)
 
 
-@app.post("/dashboard", tags=["base"], summary="获取主页信息接口")
+@app.get("/dashboard", tags=["base"], summary="获取主页信息接口")
 async def get_dashboard_info():
     """首页展示数据"""
     fake_dashboard_data = {
@@ -179,6 +192,8 @@ async def upload_product_api(file: UploadFile = File(...), user_id: int = Depend
 
 @app.post("/streamer-sales/chat", tags=["base"], summary="对话接口", deprecated=True)
 async def streamer_sales_chat(chat_item: ChatItem, response: Response):
+    from sse_starlette import EventSourceResponse
+
     # 对话总接口
     response.headers["Content-Type"] = "text/event-stream"
     response.headers["Cache-Control"] = "no-cache"

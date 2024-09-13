@@ -9,18 +9,19 @@
 @Desc    :   主播信息数据结构
 """
 
-from typing import List
+from typing import Optional
+from sqlmodel import Field, Relationship, SQLModel
 
-from pydantic import BaseModel
 
+# =======================================================
+#                      数据库模型
+# =======================================================
+class StreamerInfo(SQLModel, table=True):
+    __tablename__ = "streamer_info"
 
-class StreamerInfoItem(BaseModel):
-    user_id: int = 0
-
-    id: int = 0
-    name: str = ""
-    character: List[str] = None
-    value: str = ""
+    streamer_id: int | None = Field(default=None, primary_key=True, unique=True)
+    name: str = Field(index=True, unique=True)
+    character: str = ""
     avatar: str = ""  # 头像
 
     tts_weight_tag: str = ""  # 艾丝妲
@@ -32,7 +33,8 @@ class StreamerInfoItem(BaseModel):
 
     delete: bool = False
 
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
 
-class StreamerInfo(BaseModel):
-    # 主播信息
-    streamerId: int
+    room_info: Optional["StreamRoomInfo"] | None = Relationship(
+        back_populates="streamer_info", sa_relationship_kwargs={"lazy": "selectin"}
+    )

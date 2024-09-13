@@ -11,7 +11,8 @@ import {
   type RoomProductData,
   type RoomDetailItem,
   type StreamingRoomStatusItem,
-  type StreamingRoomProductList
+  type StreamingRoomProductList,
+  onAirRoomStartRequest
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
@@ -80,7 +81,7 @@ const getProductInfo = async () => {
 // 获取商品表格信息
 const RoomDetailInfo = ref({} as RoomDetailItem)
 RoomDetailInfo.value.streamer_info = {} as StreamerInfo
-RoomDetailInfo.value.streamer_info.id = 0
+RoomDetailInfo.value.streamer_info.streamer_id = 0
 RoomDetailInfo.value.pageSize = 10
 RoomDetailInfo.value.room_id = Number(props.roomId)
 RoomDetailInfo.value.product_list = [] as StreamingRoomProductList[]
@@ -88,6 +89,10 @@ RoomDetailInfo.value.status = {} as StreamingRoomStatusItem
 const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
+  if (RoomDetailInfo.value.room_id === 0) {
+    return
+  }
+
   try {
     const { data } = await roomDetailRequest(
       String(RoomDetailInfo.value.room_id),
@@ -142,7 +147,7 @@ onMounted(() => {
 // 新增商品
 const handelAddProductClick = async () => {
   // 先保存商品，防止文案 or 数字人视频丢失
-  onSubmit()
+  // onSubmit()
 
   drawerShow.value = true
   getProductInfo()
@@ -156,7 +161,7 @@ function cancelClick() {
 async function confirmClick() {
   EditProductList.value = RoomDetailInfo.value
   EditProductList.value.product_list = DrawerProductList.value.product_list
-  EditProductList.value.streamer_id = RoomDetailInfo.value.streamer_info.id
+  EditProductList.value.streamer_id = RoomDetailInfo.value.streamer_info.streamer_id
 
   console.log(EditProductList.value)
   try {
@@ -184,10 +189,10 @@ async function confirmClick() {
 }
 
 // 保存
-const onSubmit = () => {
+const onSubmit = async () => {
   try {
     // 调用接口保存商品
-    RoomCreadeOrEditRequest(RoomDetailInfo.value)
+    await RoomCreadeOrEditRequest(RoomDetailInfo.value)
     ElMessage.success('保存成功')
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
@@ -198,14 +203,31 @@ const onSubmit = () => {
   }
 }
 
-const handelOnAirClick = () => {
+const handelOnAirClick = async () => {
   for (const entry of RoomDetailInfo.value.product_list) {
     if (entry.start_video === '') {
       ElMessage.error('必须将所有的商品都生成数字人视频才可以进行开播')
       return false
     }
   }
-  onSubmit()
+
+  // 保存商品信息
+  await onSubmit()
+
+  if (RoomDetailInfo.value.status.live_status !== 1) {
+    try {
+      // 调用接口执行开播
+      await onAirRoomStartRequest(RoomDetailInfo.value.room_id)
+      ElMessage.success('开播成功')
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        ElMessage.error('开播成功' + error.message)
+      } else {
+        ElMessage.error('未知错误：' + error)
+      }
+    }
+  }
+
   router.push({ name: 'StreamingOnAir', params: { roomId: String(RoomDetailInfo.value.room_id) } })
 }
 
@@ -268,15 +290,15 @@ const handelControlClick = (
                     <el-col :span="6">
                       <el-image
                         style="width: 80px; height: 80px"
-                        :src="item.image_path"
+                        :src="item.product_info.image_path"
                         fit="contain"
                       />
                     </el-col>
                     <el-col :span="18">
                       <div class="product-info">
-                        <p class="title">{{ item.product_name }}</p>
-                        <p class="content">{{ item.heighlights }}</p>
-                        <p class="price">￥{{ item.selling_price }}</p>
+                        <p class="title">{{ item.product_info.product_name }}</p>
+                        <p class="content">{{ item.product_info.heighlights }}</p>
+                        <p class="price">￥{{ item.product_info.selling_price }}</p>
                       </div>
                     </el-col>
                   </el-row>
@@ -303,7 +325,7 @@ const handelControlClick = (
 
     <el-card shadow="never">
       <StreamerInfoComponent
-        disableChange
+        :disable-change="true"
         v-model="RoomDetailInfo.streamer_info"
         :optionList="streamerNameOptions"
       />
@@ -325,38 +347,38 @@ const handelControlClick = (
 
       <!-- TODO 商品表格可以做成 component 组件 -->
       <el-table :data="RoomDetailInfo.product_list" max-height="1000" border>
-        <el-table-column prop="product_id" label="ID" align="center" width="50px" />
+        <el-table-column prop="product_info.product_id" label="ID" align="center" width="50px" />
 
-        <el-table-column prop="image_path" label="图片" align="center">
+        <el-table-column prop="product_info.image_path" label="图片" align="center">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <!-- TODO 加上  :preview-src-list="[scope.row.image_path]"  -->
-              <el-image :src="scope.row.image_path" />
+              <el-image :src="scope.row.product_info.image_path" />
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column prop="product_name" label="名称" align="center" />
-        <el-table-column prop="product_class" label="分类" align="center" />
-        <el-table-column prop="heighlights" label="亮点" align="center" />
-        <el-table-column prop="selling_price" label="价格" align="center" />
-        <el-table-column prop="amount" label="库存" align="center" />
-        <el-table-column prop="departure_place" label="发货地" align="center" />
-        <el-table-column prop="delivery_company" label="快递公司" align="center" />
-        <el-table-column prop="upload_date" label="上传时间" align="center" />
+        <el-table-column prop="product_info.product_name" label="名称" align="center" />
+        <el-table-column prop="product_info.product_class" label="分类" align="center" />
+        <el-table-column prop="product_info.heighlights" label="亮点" align="center" />
+        <el-table-column prop="product_info.selling_price" label="价格" align="center" />
+        <el-table-column prop="product_info.amount" label="库存" align="center" />
+        <el-table-column prop="product_info.departure_place" label="发货地" align="center" />
+        <el-table-column prop="product_info.delivery_company" label="快递公司" align="center" />
+        <el-table-column prop="product_info.upload_date" label="上传时间" align="center" />
         <el-table-column label="操作" v-slot="{ row }" align="center" width="400px">
           <div class="control-item">
             <el-button
               size="small"
-              :type="row.instruction !== '' ? 'success' : 'warning'"
-              :icon="row.instruction !== '' ? Check : Warning"
+              :type="row.product_info.instruction !== '' ? 'success' : 'warning'"
+              :icon="row.product_info.instruction !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'Instruction',
-                  row.instruction,
+                  row.product_info.instruction,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "
@@ -371,11 +393,11 @@ const handelControlClick = (
               :icon="row.sales_doc !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'SalesDoc',
                   row.sales_doc,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "
@@ -390,11 +412,11 @@ const handelControlClick = (
               :icon="row.start_video !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'DigitalHuman',
                   row.start_video,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "

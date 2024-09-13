@@ -2,8 +2,9 @@ import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo, ProductItem } from '@/api/product'
 import { header_authorization } from '@/api/user'
 
-interface StreamingRoomProductList extends ProductItem {
+interface StreamingRoomProductList {
   product_id: number
+  product_info: ProductItem
   start_time: string
   sales_doc: string
   start_video: string
@@ -16,7 +17,7 @@ interface messageItem {
   userName: string
   avatar: string
   message: string
-  datetime: string
+  send_time: string
 }
 
 interface StreamingRoomStatusItem {
@@ -80,7 +81,7 @@ interface RoomDetailItem {
 // 获取后端主播信息
 const streamerRoomListRequest = () => {
   return request_handler<ResultPackage<StreamingRoomInfo[]>>({
-    method: 'POST',
+    method: 'GET',
     url: '/streaming-room/list',
     headers: {
       Authorization: header_authorization.value
@@ -91,9 +92,9 @@ const streamerRoomListRequest = () => {
 // 获取特定直播间的详情
 const roomDetailRequest = (roomId_: string, currentPage_: number, pageSize_: number) => {
   return request_handler<ResultPackage<RoomDetailItem>>({
-    method: 'POST',
-    url: '/streaming-room/detail',
-    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ },
+    method: 'GET',
+    url: `/streaming-room/info/${roomId_}`,
+    params: { currentPage: currentPage_, pageSize: pageSize_ },
     headers: {
       Authorization: header_authorization.value
     }
@@ -103,9 +104,8 @@ const roomDetailRequest = (roomId_: string, currentPage_: number, pageSize_: num
 // 添加商品的时候，获取所有商品，内含选中商品
 const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSize_: number) => {
   return request_handler<ResultPackage<RoomProductData>>({
-    method: 'POST',
-    url: '/streaming-room/product-add',
-    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ },
+    method: 'GET',
+    url: `/streaming-room/product-edit-list/${roomId_}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -114,10 +114,34 @@ const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSi
 
 // 添加或者更新直播间接口
 const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
-  return request_handler<ResultPackage<number>>({
+  if (params.room_id === 0) {
+    // 新建
+    return request_handler<ResultPackage<number>>({
+      method: 'POST',
+      url: '/streaming-room/create',
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  } else {
+    // 编辑
+    return request_handler<ResultPackage<number>>({
+      method: 'PUT',
+      url: `/streaming-room/edit/${params.room_id}`,
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  }
+}
+
+// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+const onAirRoomStartRequest = (roomId_: number) => {
+  return request_handler<ResultPackage<StreamingRoomStatusItem>>({
     method: 'POST',
-    url: '/streaming-room/edit/form',
-    data: params,
+    url: `/streaming-room/online/${roomId_}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -125,11 +149,10 @@ const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
 }
 
 // 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
-const onAirRoomInfoRequest = (roomId_: number) => {
+const onAirRoomInfoRequest = (roomId: number) => {
   return request_handler<ResultPackage<StreamingRoomStatusItem>>({
-    method: 'POST',
-    url: '/streaming-room/live-info',
-    data: { roomId: roomId_ },
+    method: 'GET',
+    url: `/streaming-room/live-info/${roomId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -139,7 +162,7 @@ const onAirRoomInfoRequest = (roomId_: number) => {
 // 用户发起对话
 const onAirRoomChatRequest = async (roomId_: number, message_: string) => {
   return request_handler<ResultPackage<messageItem>>({
-    method: 'POST',
+    method: 'PUT',
     url: '/streaming-room/chat',
     data: { roomId: roomId_, message: message_ },
     headers: {
@@ -148,12 +171,11 @@ const onAirRoomChatRequest = async (roomId_: number, message_: string) => {
   })
 }
 
-// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+// 下一个商品
 const onAirRoomNextProductRequest = async (roomId_: number) => {
   return request_handler<ResultPackage<StreamingRoomStatusItem>>({
     method: 'POST',
-    url: '/streaming-room/next-product',
-    data: { roomId: roomId_ },
+    url: `/streaming-room/next-product/${roomId_}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -161,18 +183,17 @@ const onAirRoomNextProductRequest = async (roomId_: number) => {
 }
 
 // 删除特定直播间信息
-const deleteStreamingRoomByIdRequest = (roomId_: number) => {
+const deleteStreamingRoomByIdRequest = (roomId: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
-    url: '/streaming-room/delete',
-    data: { roomId: roomId_ },
+    method: 'DELETE',
+    url: `/streaming-room/delete/${roomId}`,
     headers: {
       Authorization: header_authorization.value
     }
   })
 }
 
-// 发送音频文件到服务器
+// 发送浏览器录音音频文件到服务器，用于 ASR
 const sendAudioToServer = async (blob: Blob) => {
   const formData = new FormData()
   formData.append('file', blob, 'recording.webm')
@@ -202,9 +223,8 @@ const genAsrResult = async (roomId_: number, asrFileUrl_: string) => {
 // 下播
 const streamRoomOffline = (roomId_: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
-    url: '/streaming-room/offline',
-    data: { roomId: roomId_ },
+    method: 'PUT',
+    url: `/streaming-room/offline/${roomId_}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -228,5 +248,6 @@ export {
   deleteStreamingRoomByIdRequest,
   sendAudioToServer,
   streamRoomOffline,
-  genAsrResult
+  genAsrResult,
+  onAirRoomStartRequest
 }
